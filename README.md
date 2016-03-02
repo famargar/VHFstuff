@@ -1,5 +1,5 @@
 # VHFstuff
-Summary plots for Very Heavy Fermions analyses
+These macros create the summary plots for the single Very Heavy Fermions analyses, according to different multiplets representations
 
 YComparison.C           compares Y analyses limits w/ theory 
 
