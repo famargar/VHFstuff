@@ -1,0 +1,142 @@
+#include <vector>
+#include <iostream>
+#include "TStyle.h"
+#include "TGraph.h"
+#include "TLegend.h"
+#include "TCanvas.h"
+#include "TLatex.h"
+#include "TGraphAsymmErrors.h"
+#include "TAxis.h"
+#include "TLine.h"
+
+using namespace std;
+
+#ifndef __CINT__
+
+int main() {
+
+    // Data points for limits
+    //vector<double> const x{0.5, 1., 1.5, 2., 2.4, 2.7, 3.};
+    vector<double> const x{700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500};
+
+    // limits in pb
+    vector<double> const TbotWbot_Tb{10.0, 1.00, 0.70, 0.50, 0.35, 0.25, 0.25, 0.25, 0.25};
+
+    //vector<double> const theory_Tb{5.820,   3.860,  2.720,  1.950, 1.350, 0.982, 0.716, 0.540, 0.408}; //1400.0100 interp
+    vector<double> const theory_Tb{2.910, 1.930,  1.360,  0.975, 0.675, 0.491, 0.358, 0.270, 0.204}; //1400.0100 inter
+    //vector<double> const theory_Tb{7.29,   3.69,  2.05,  1.19, 0.682, 0.416, 0.259, 0.168, 0.111}; Andrea and Xanda
+    //vector<double> const theory_Tt{7.07, 3.64, 2.01, 1.16, 0.693, 0.431, 0.275, 0.180, 0.119};
+
+    vector<double> const scale_Tb{0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01}; 
+
+    //theory_Tb=scale_Tb*theory_Tt;
+
+    // Canvas
+    TCanvas canvas("canvas", "", 1000, 1000);
+    canvas.SetTicks();
+    canvas.SetGrid(kFALSE);
+    canvas.SetGridy(kFALSE);
+    
+    // Style
+    gStyle->SetStripDecimals(kFALSE);
+    
+    
+    // Graphs with observed and mean expected limits
+
+    TGraph graph_Nikoz_Tb(x.size(), x.data(), TbotWbot_Tb.data());
+    graph_Nikoz_Tb.SetLineColor(kCyan-2);
+    graph_Nikoz_Tb.SetLineStyle(1);
+    graph_Nikoz_Tb.SetLineWidth(2);
+
+    TGraph graph_theory_Tb(x.size(), x.data(), theory_Tb.data());
+    graph_theory_Tb.SetLineColor(kBlack);
+    graph_theory_Tb.SetLineStyle(2);
+    graph_theory_Tb.SetLineWidth(3);
+    
+    /*
+    TGraph graph_theory_Tt(x.size(), x.data(), theory_Tt.data());
+    graph_theory_Tt.SetLineColor(kBlack);
+    graph_theory_Tt.SetLineStyle(2);
+    graph_theory_Tt.SetLineWidth(3);
+    */
+    
+    // add reference lines...
+    TLine mum1(0.25, 231, 3.25, 231);
+    TLine mup1(0.25,  18, 3.25,  18);
+    mum1.SetLineWidth(2);
+    mum1.SetLineColor(2);
+    mup1.SetLineWidth(2);
+
+    // ..and corresponding text on top of them
+    TLatex latexm1;
+    TLatex latexp1;
+    latexm1.SetTextAlign(11);
+    latexp1.SetTextAlign(10);
+    latexm1.SetTextSize(0.030);
+    latexp1.SetTextSize(0.030);
+
+    gPad->SetLogy(1);
+    graph_Nikoz_Tb.Draw("a3");
+    graph_theory_Tb.Draw("l");
+    //graph_theory_Tt.Draw("l");
+
+    mum1.Draw("same");
+    //mup1.Draw("same");
+    latexm1.DrawLatex(.5,270, "#sigma_{VLQ}");
+    //latexp1.DrawLatex(.5,30, "#sigma_{tHq}(C_{t} = 1)");    
+    
+    // Decoration for axes
+    
+    graph_Nikoz_Tb.SetTitle(";m_{T}(GeV);"
+     "95% CL limit on #sigma x BR (pb)");
+    graph_Nikoz_Tb.GetYaxis()->SetRangeUser(0.1, 10.0);
+    graph_Nikoz_Tb.GetXaxis()->SetTitleOffset(1.3);
+    graph_Nikoz_Tb.GetYaxis()->SetTitleOffset(1.3);
+    graph_Nikoz_Tb.GetYaxis()->SetLabelSize(0.03);
+    graph_Nikoz_Tb.GetXaxis()->SetLabelSize(0.03);
+    
+    
+    // Add a legend
+    TLegend legend(0.35, 0.65, 0.85, 0.85);
+    legend.SetLineColor(0);
+    legend.SetHeader("Tb, T #rightarrow Wb, singlet ");
+    legend.AddEntry((TObject*)0, " ", " ");	
+    legend.SetTextSize(0.030);
+    //legend.SetMargin(0.2);
+    //legend.SetEntrySeparation(5);
+    legend.AddEntry(&graph_Nikoz_Tb, "B2G-16-006 Tb #rightarrow Wbb #rightarrow l#nubb", "l");
+    legend.AddEntry((TObject*)0, "", "");
+    legend.AddEntry(&graph_theory_Tb, "#sigma_{NLO}, c_{Wb}=1, BR(Wb)=0.5", "l");
+    legend.AddEntry((TObject*)0, "", "");
+    //legend.AddEntry(&graph_theory_Tt, "Theory NLO (c_{Wt}=0.3)");
+    
+    legend.Draw();
+    
+    
+    // CMS labels
+    //TLatex cmsLabel(0.12, 0.91, "#scale[1.2]{#font[62]{CMS}} #font[52]{Preliminary}");
+    TLatex cmsLabel(0.12, 0.91, "#scale[1.2]{#font[62]{CMS}}");
+    cmsLabel.SetNDC();
+    cmsLabel.SetTextSize(0.04);
+    cmsLabel.SetTextAlign(11);
+    
+    TLatex energyLabel(0.9, 0.91, "#font[42]{2.3 fb^{-1} (13 TeV)}");
+    energyLabel.SetNDC();
+    energyLabel.SetTextSize(0.04);
+    energyLabel.SetTextAlign(31);
+    
+    cmsLabel.Draw();
+    energyLabel.Draw();
+    
+    graph_Nikoz_Tb.Draw("same");
+    //graph_Heiner_Tb.Draw("same");
+    //gPad->SetLogy(1);
+    
+    // Save the figure
+    canvas.Print("plotTSingComparison_Wb.pdf");
+    canvas.Print("plotTSingComparison_Wb.C");
+    cout<<"printed"<<endl;
+
+}
+
+#endif
